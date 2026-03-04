@@ -8,9 +8,7 @@ pygame.init()
 pygame.font.init()
 clock = pygame.time.Clock()
 
-game_scenes.generate_bricks()
-
-game_state = "start"  # start | game | pause | game_over
+game_state = "start"  # start | game | pause | game_over | won_game
 main_rect = None      # Paddle does not exist yet
 paddle_y = constants.height - 60
 
@@ -25,8 +23,10 @@ bottom_wall = pygame.Rect(0, constants.height - constants.wall_thickness // 2, c
 
 top_space = True
 
-dummy_rect = pygame.Rect(0, constants.height - constants.wall_thickness // 2, constants.width, 10)
-
+# main_rect = pygame.Rect(constants.width // 2 - 102, paddle_y, 175, 30)
+dummy_rect = pygame.Rect(constants.width // 2 - 102, paddle_y, 175, 30)
+dummy_bricks = game_scenes.generate_bricks()
+bricks = game_scenes.generate_bricks()
 
 # x1 y1, x2 y2, x3 y3
 triangle_pos_1 = [
@@ -59,14 +59,14 @@ while True:
 					if game_state == "start":
 						game_state = "game"
 						main_rect = pygame.Rect(constants.width // 2 - 102, paddle_y, 175, 30)
-						game_scenes.generate_bricks()
+						bricks = game_scenes.generate_bricks()
 						ball_x = constants.width - constants.width // 2
 						ball_y = constants.height // 2 + 100
 
 					elif game_state == "game_over":
 						game_state = "game"
 						main_rect = pygame.Rect(constants.width // 2 - 102, paddle_y, 175, 30)
-						game_scenes.generate_bricks()
+						bricks = game_scenes.generate_bricks()
 						ball_x = constants.width - constants.width // 2
 						ball_y = constants.height // 2 + 100
 					
@@ -87,7 +87,7 @@ while True:
 				if event.type == pygame.K_RETURN or event.type == pygame.K_KP_ENTER:
 					if game_state == "start":
 						main_rect = pygame.Rect(constants.width // 2 - 102, paddle_y, 175, 30)
-						game_scenes.generate_bricks()
+						bricks = game_scenes.generate_bricks()
 						ball_x = constants.width - constants.width // 2
 						ball_y = constants.height // 2 + 100
 
@@ -100,7 +100,7 @@ while True:
 				if game_state == "game_over" and event.key == pygame.K_p:
 					game_state = "game"
 					main_rect = pygame.Rect(constants.width//2 - 102, paddle_y, 175, 30)
-					game_scenes.generate_bricks()
+					bricks = game_scenes.generate_bricks()
 					ball_x = constants.width - constants.width // 2
 					ball_y = constants.height // 2 + 100
 			
@@ -116,7 +116,8 @@ while True:
 						sys.exit()
 					
 					if cheat_rect.collidepoint(mouse_pos):
-						print("Cheat menu clicked")
+						game_state = "won_game"
+						"""print("Cheat menu clicked")"""
 
 				if game_state == "game_over":
 
@@ -140,17 +141,27 @@ while True:
 					if start_rect.collidepoint(mouse_pos):
 						game_state = "game"
 						main_rect = pygame.Rect(constants.width//2 - 102, paddle_y, 175, 30)
-						game_scenes.generate_bricks()
+						bricks = game_scenes.generate_bricks()
 						ball_x = constants.width - constants.width // 2
-						ball_y = constants.height // 2 + 100	
+						ball_y = constants.height // 2 + 100
+				
+				if game_state == "won_game":
+
+					if won_exit_rect.collidepoint(mouse_pos):
+						print(f"{constants.TERMINAL_RED}Exiting...{constants.TERMINAL_RESET}")
+						pygame.quit()
+						sys.exit()
+					
+					if won_menu_rect.collidepoint(mouse_pos):
+						game_state = "start"
 					
 
 	keys = pygame.key.get_pressed()
 
 	if game_state == "start":
-		start_rect = game_scenes.start_screen(dummy_rect, top_space, triangle_pos_1, triangle_pos_2)
+		start_rect = game_scenes.start_screen(dummy_rect, top_space, triangle_pos_1, triangle_pos_2, dummy_bricks)
 	if game_state == "game" and main_rect is not None:
-		game_scenes.main_game(main_rect, ball_x, ball_y, ball_radius, bottom_wall)
+		game_scenes.main_game(main_rect, ball_x, ball_y, ball_radius, bottom_wall, bricks)
 
 		prev_paddle_x = main_rect.x
 
@@ -176,7 +187,7 @@ while True:
 		prev_paddle_x = main_rect.x
 		paddle_vx = main_rect.x - prev_paddle_x
 
-		for brick in game_scenes.bricks[:]:
+		for brick in bricks[:]:
 			brick_rect, color = brick
 
 			if ball_rect.colliderect(brick_rect):
@@ -206,7 +217,7 @@ while True:
 				ball_x = ball_rect.centerx
 				ball_y = ball_rect.centery
 
-				game_scenes.bricks.remove(brick)
+				bricks.remove(brick)
 				break
 
 		if ball_rect.colliderect(main_rect):
@@ -232,8 +243,10 @@ while True:
 			ball_vx = -abs(ball_vx)
 		
 		# Top wall
-		if ball_y - ball_radius <= 10:
-			ball_vy = -abs(ball_vy)
+		if ball_rect.top <= 10:
+			ball_rect.top = 10
+			ball_vy = abs(ball_vy)
+			ball_y = ball_rect.centery
 
 		# Collide with the bottom
 		if ball_y + ball_radius >= bottom_wall.top:
@@ -243,6 +256,8 @@ while True:
 		paused_rect, cheat_rect, exit_rect = game_scenes.pause_menu()
 	if game_state == "game_over":
 		play_rect, exit_over_rect, main_menu_rect = game_scenes.game_over()
+	if game_state == "won_game":
+		won_menu_rect, won_exit_rect = game_scenes.won_game()
 
 	pygame.display.flip()
 	clock.tick(60)
