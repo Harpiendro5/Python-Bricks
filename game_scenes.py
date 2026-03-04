@@ -1,0 +1,159 @@
+import pygame
+import random
+import constants
+import font_connection
+
+
+bricks = []
+
+def generate_bricks():
+	global bricks
+	bricks = []
+
+	for row in range(constants.rows):
+		for col in range(constants.columns):
+			x = 22 + col * 130 # Start at correct x cordinates | width + gap
+			y = 18 + row * 45 # Start at correct y cordinates | height + vertical gap
+			color = random.choice(constants.colors)
+			rect = pygame.Rect(x, y, constants.brick_width, constants.brick_height)
+			bricks.append((rect, color))
+
+def draw_bricks(bricks, alpha = 255):
+	if not bricks:
+		return
+	
+	# Alpha < 255 makes them transperant
+	if alpha < 255:
+		# Generate surface that supports transperancy
+		temp_surface = pygame.Surface((constants.width, constants.height), pygame.SRCALPHA)
+		for rect, color in bricks:
+			pygame.draw.rect(temp_surface, color + (alpha), rect)
+		constants.screen.blit(temp_surface, (0, 0))
+	
+	else:
+		for rect, color in bricks:
+			pygame.draw.rect(constants.screen, color, rect)
+
+def game_over():
+	constants.screen.fill(constants.BLACK)
+	game_over = font_connection.game_over_font.render("Game Over", True, constants.RED)
+	over_rect = game_over.get_rect(center = (constants.width // 2, constants.height // 2 - 240))
+
+	play_text = font_connection.mode_select_font.render("Play Again", True, constants.WHITE)
+	play_rect = play_text.get_rect(center = (constants.width // 2, constants.height // 2 - 40))
+
+	main_menu_text = font_connection.mode_select_font.render("Main Menu", True, constants.WHITE)
+	main_menu_rect = main_menu_text.get_rect(center = (constants.width // 2, constants.height // 2 + 40))
+
+	exit_text = font_connection.mode_select_font.render("Exit", True, (255, 255, 255))
+	exit_over_rect = exit_text.get_rect(center = (constants.width // 2, constants.height // 2 + 120))
+
+	pygame.draw.rect(constants.screen, (40, 40, 60), over_rect.inflate(100, 100), border_radius = 10) # Game Over title
+
+	pygame.draw.rect(constants.screen, (40, 40, 60), play_rect.inflate(30, 20), border_radius = 8)
+	pygame.draw.rect(constants.screen, (40, 40, 60), main_menu_rect.inflate(30, 20), border_radius = 8)
+	pygame.draw.rect(constants.screen, (40, 40, 60), exit_over_rect.inflate(30, 20), border_radius = 8)
+
+	constants.screen.blit(game_over, over_rect)
+	constants.screen.blit(play_text, play_rect)
+	constants.screen.blit(main_menu_text, main_menu_rect)
+	constants.screen.blit(exit_text, exit_over_rect)
+
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.wall_thickness, constants.height))  # Left
+	pygame.draw.rect(constants.screen, (40, 40, 60), (constants.width - constants.wall_thickness, 0, constants.wall_thickness, constants.height)) # Right
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.width, 10)) # Top
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, constants.height - constants.wall_thickness // 2, constants.width, 10)) # Bottom
+
+	pygame.display.flip()
+
+	return play_rect, exit_over_rect, main_menu_rect
+
+def start_screen(dummy_rect, top_space, triangle_pos_1, triangle_pos_2):
+	constants.screen.fill(constants.BLACK)
+
+	preview_bricks = generate_bricks()
+	draw_bricks(preview_bricks, alpha = 80)
+
+	# Temporary transparent paddle
+	temp_paddle_surf = pygame.Surface((dummy_rect.width, dummy_rect.height), pygame.SRCALPHA)
+	dummy_paddle_alpha = (173, 216, 230, 80)
+	pygame.draw.rect(temp_paddle_surf, dummy_paddle_alpha, (0, 0, dummy_rect.width, dummy_rect.height))
+	constants.screen.blit(temp_paddle_surf, (dummy_rect.x, dummy_rect.y))
+
+	start_text = font_connection.game_title_font.render("Mode Select", True, (255, 255, 255))
+	start_rect = start_text.get_rect(center = (constants.width // 2, constants.height //2 - 160))
+
+	play_text = font_connection.game_over_font.render("START GAME", True, constants.LIGHT_GREEN)
+	play_rect = play_text.get_rect(center = (constants.width // 2, constants.height // 2 - 300))
+
+	easy_text = font_connection.mode_select_font.render("EASY", True, constants.WHITE)
+	easy_rect = easy_text.get_rect(center = (constants.width // 2, constants.height // 2 + 80))
+
+	hard_text = font_connection.mode_select_font.render("HARD", True, constants.WHITE)
+	hard_rect = hard_text.get_rect(center = (constants.width // 2, constants.height // 2 + 150))
+
+	constants.screen.blit(start_text, start_rect)
+	constants.screen.blit(play_text, play_rect)
+	constants.screen.blit(easy_text, easy_rect)
+	constants.screen.blit(hard_text, hard_rect)
+
+	if top_space == True:
+		pygame.draw.polygon(constants.screen, constants.WHITE, triangle_pos_1)
+	elif top_space == False:
+		pygame.draw.polygon(constants.screen, constants.WHITE, triangle_pos_2)
+
+	# Walls
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.wall_thickness, constants.height))  # Left
+	pygame.draw.rect(constants.screen, (40, 40, 60), (constants.width - constants.wall_thickness, 0, constants.wall_thickness, constants.height)) # Right
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.width, 10)) # Top
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, constants.height - constants.wall_thickness // 2, constants.width, 10))
+
+	pygame.display.flip()
+
+	return start_rect
+
+def main_game(main_rect, ball_x, ball_y, ball_radius, bottom_wall):
+	constants.screen.fill(constants.BLACK)
+	if main_rect:
+		pygame.draw.rect(constants.screen, (173, 216, 230), main_rect)
+	pygame.draw.circle(constants.screen, constants.WHITE, (ball_x, ball_y), ball_radius)
+
+	# Load the bricks on the page
+	draw_bricks(alpha = 255)
+
+	# Walls
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.wall_thickness, constants.height))  # Left
+	pygame.draw.rect(constants.screen, (40, 40, 60), (constants.width - constants.wall_thickness, 0, constants.wall_thickness, constants.height)) # Right
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.width, 10)) # Top
+	pygame.draw.rect(constants.screen, (40, 40, 60), bottom_wall) # Bottom
+
+	pygame.display.flip()
+
+def pause_menu():
+	constants.screen.fill((10, 10, 10))
+
+	paused_text = font_connection.mode_select_font.render("Play", True, constants.WHITE)
+	paused_rect = paused_text.get_rect(center=(constants.width//2, constants.height//2))
+
+	cheat_text = font_connection.mode_select_font.render("Cheat Menu", True, constants.WHITE)
+	cheat_rect = cheat_text.get_rect(center = (constants.width//2, constants.height//2 + 80))
+
+	exit_text = font_connection.mode_select_font.render("Exit", True, constants.WHITE)
+	exit_rect = exit_text.get_rect(center = (constants.width//2, constants.height//2 - 80))
+
+	pygame.draw.rect(constants.screen, (40, 40, 60), paused_rect.inflate(30, 20), border_radius = 8)
+	pygame.draw.rect(constants.screen, (40, 40, 60), cheat_rect.inflate(30, 20), border_radius = 8)
+	pygame.draw.rect(constants.screen, (40, 40, 60), exit_rect.inflate(30, 20), border_radius = 8)
+
+	constants.screen.blit(paused_text, paused_rect)
+	constants.screen.blit(cheat_text, cheat_rect)
+	constants.screen.blit(exit_text, exit_rect)
+
+	# Walls
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.wall_thickness, constants.height))  # Left
+	pygame.draw.rect(constants.screen, (40, 40, 60), (constants.width - constants.wall_thickness, 0, constants.wall_thickness, constants.height)) # Right
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.width, 10)) # Top
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, constants.height - constants.wall_thickness // 2, constants.width, 10)) # Bottom
+	pygame.display.flip()
+
+	return paused_rect, cheat_rect, exit_rect
