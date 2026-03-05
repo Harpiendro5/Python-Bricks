@@ -1,7 +1,7 @@
 import pygame
 import random
 import constants
-import font_connection
+import font_and_pic_connection
 
 
 def generate_bricks():
@@ -35,16 +35,16 @@ def draw_bricks(bricks, alpha = 255):
 
 def game_over():
 	constants.screen.fill(constants.BLACK)
-	game_over = font_connection.game_over_font.render("Game Over", True, constants.RED)
+	game_over = font_and_pic_connection.game_over_font.render("Game Over", True, constants.RED)
 	over_rect = game_over.get_rect(center = (constants.width // 2, constants.height // 2 - 240))
 
-	play_text = font_connection.mode_select_font.render("Play Again", True, constants.WHITE)
+	play_text = font_and_pic_connection.mode_select_font.render("Play Again", True, constants.WHITE)
 	play_rect = play_text.get_rect(center = (constants.width // 2, constants.height // 2 - 40))
 
-	main_menu_text = font_connection.mode_select_font.render("Main Menu", True, constants.WHITE)
+	main_menu_text = font_and_pic_connection.mode_select_font.render("Main Menu", True, constants.WHITE)
 	main_menu_rect = main_menu_text.get_rect(center = (constants.width // 2, constants.height // 2 + 40))
 
-	exit_text = font_connection.mode_select_font.render("Exit", True, (255, 255, 255))
+	exit_text = font_and_pic_connection.mode_select_font.render("Exit", True, (255, 255, 255))
 	exit_over_rect = exit_text.get_rect(center = (constants.width // 2, constants.height // 2 + 120))
 
 	pygame.draw.rect(constants.screen, (40, 40, 60), over_rect.inflate(100, 100), border_radius = 10) # Game Over title
@@ -78,16 +78,16 @@ def start_screen(dummy_rect, top_space, triangle_pos_1, triangle_pos_2, dummy_br
 	pygame.draw.rect(temp_paddle_surf, dummy_paddle_alpha, (0, 0, dummy_rect.width, dummy_rect.height))
 	constants.screen.blit(temp_paddle_surf, (dummy_rect.x, dummy_rect.y))
 
-	start_text = font_connection.game_title_font.render("Mode Select", True, (255, 255, 255))
+	start_text = font_and_pic_connection.game_title_font.render("Mode Select", True, (255, 255, 255))
 	start_rect = start_text.get_rect(center = (constants.width // 2, constants.height //2 - 160))
 
-	play_text = font_connection.game_over_font.render("START GAME", True, constants.LIGHT_GREEN)
+	play_text = font_and_pic_connection.game_over_font.render("START GAME", True, constants.LIGHT_GREEN)
 	play_rect = play_text.get_rect(center = (constants.width // 2, constants.height // 2 - 300))
 
-	easy_text = font_connection.mode_select_font.render("EASY", True, constants.WHITE)
+	easy_text = font_and_pic_connection.mode_select_font.render("EASY", True, constants.WHITE)
 	easy_rect = easy_text.get_rect(center = (constants.width // 2, constants.height // 2 + 80))
 
-	hard_text = font_connection.mode_select_font.render("HARD", True, constants.WHITE)
+	hard_text = font_and_pic_connection.mode_select_font.render("HARD", True, constants.WHITE)
 	hard_rect = hard_text.get_rect(center = (constants.width // 2, constants.height // 2 + 150))
 
 	constants.screen.blit(start_text, start_rect)
@@ -130,13 +130,13 @@ def main_game(main_rect, ball_x, ball_y, ball_radius, bottom_wall, bricks):
 def pause_menu():
 	constants.screen.fill((10, 10, 10))
 
-	paused_text = font_connection.mode_select_font.render("Play", True, constants.WHITE)
+	paused_text = font_and_pic_connection.mode_select_font.render("Play", True, constants.WHITE)
 	paused_rect = paused_text.get_rect(center=(constants.width//2, constants.height//2))
 
-	cheat_text = font_connection.mode_select_font.render("Cheat Menu", True, constants.WHITE)
+	cheat_text = font_and_pic_connection.mode_select_font.render("Cheat Menu", True, constants.WHITE)
 	cheat_rect = cheat_text.get_rect(center = (constants.width//2, constants.height//2 + 80))
 
-	exit_text = font_connection.mode_select_font.render("Exit", True, constants.WHITE)
+	exit_text = font_and_pic_connection.mode_select_font.render("Exit", True, constants.WHITE)
 	exit_rect = exit_text.get_rect(center = (constants.width//2, constants.height//2 - 80))
 
 	pygame.draw.rect(constants.screen, (40, 40, 60), paused_rect.inflate(30, 20), border_radius = 8)
@@ -159,13 +159,13 @@ def pause_menu():
 def won_game():
 	constants.screen.fill(constants.BLACK)
 
-	won_text = font_connection.game_over_font.render("!YOU WIN!", True, constants.BRIGHT_GREEN)
+	won_text = font_and_pic_connection.game_over_font.render("!YOU WIN!", True, constants.BRIGHT_GREEN)
 	won_rect = won_text.get_rect(center = (constants.width // 2, constants.height // 2 - 300))
 
-	menu_text = font_connection.mode_select_font.render("MAIN MENU", True, constants.WHITE)
+	menu_text = font_and_pic_connection.mode_select_font.render("MAIN MENU", True, constants.WHITE)
 	won_menu_rect = menu_text.get_rect(center = (constants.width // 2, constants.height // 2 + 40))
 
-	exit_text = font_connection.mode_select_font.render("EXIT", True, constants.WHITE)
+	exit_text = font_and_pic_connection.mode_select_font.render("EXIT", True, constants.WHITE)
 	won_exit_rect = exit_text.get_rect(center = (constants.width // 2, constants.height // 2 - 40))
 
 	pygame.draw.rect(constants.screen, (40, 40, 60), won_menu_rect.inflate(30, 20), border_radius = 8)
@@ -174,6 +174,9 @@ def won_game():
 	constants.screen.blit(won_text, won_rect)
 	constants.screen.blit(menu_text, won_menu_rect)
 	constants.screen.blit(exit_text, won_exit_rect)
+
+	font_and_pic_connection.trophy_rect.center = (constants.width // 2, constants.height // 2)
+	constants.screen.blit(font_and_pic_connection.trophy, font_and_pic_connection.trophy_rect)
 
 	# Walls
 	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.wall_thickness, constants.height))  # Left
