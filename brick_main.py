@@ -23,6 +23,17 @@ bottom_wall = pygame.Rect(0, constants.height - constants.wall_thickness // 2, c
 
 top_space = True
 
+# Place Holer Values
+start_rect = pygame.Rect(0, 0, 0, 0)
+paused_rect = pygame.Rect(0, 0, 0, 0)
+cheat_rect = pygame.Rect(0, 0, 0, 0)
+exit_rect = pygame.Rect(0, 0, 0, 0)
+play_rect = pygame.Rect(0, 0, 0, 0)
+exit_over_rect = pygame.Rect(0, 0, 0, 0)
+main_menu_rect = pygame.Rect(0, 0, 0, 0)
+won_menu_rect = pygame.Rect(0, 0, 0, 0)
+won_exit_rect = pygame.Rect(0, 0, 0, 0)
+
 # main_rect = pygame.Rect(constants.width // 2 - 102, paddle_y, 175, 30)
 dummy_rect = pygame.Rect(constants.width // 2 - 102, paddle_y, 175, 30)
 dummy_bricks = game_scenes.generate_bricks()
