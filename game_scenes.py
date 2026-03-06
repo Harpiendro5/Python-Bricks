@@ -160,13 +160,13 @@ def won_game():
 	constants.screen.fill(constants.BLACK)
 
 	won_text = font_and_pic_connection.game_over_font.render("!YOU WIN!", True, constants.BRIGHT_GREEN)
-	won_rect = won_text.get_rect(center = (constants.width // 2, constants.height // 2 - 300))
+	won_rect = won_text.get_rect(center = (constants.width // 2, constants.height // 2 - 320))
 
 	menu_text = font_and_pic_connection.mode_select_font.render("MAIN MENU", True, constants.WHITE)
-	won_menu_rect = menu_text.get_rect(center = (constants.width // 2, constants.height // 2 + 40))
+	won_menu_rect = menu_text.get_rect(center = (constants.width // 2, constants.height // 2 + 20))
 
 	exit_text = font_and_pic_connection.mode_select_font.render("EXIT", True, constants.WHITE)
-	won_exit_rect = exit_text.get_rect(center = (constants.width // 2, constants.height // 2 - 40))
+	won_exit_rect = exit_text.get_rect(center = (constants.width // 2, constants.height // 2 + 100))
 
 	pygame.draw.rect(constants.screen, (40, 40, 60), won_menu_rect.inflate(30, 20), border_radius = 8)
 	pygame.draw.rect(constants.screen, (40, 40, 60), won_exit_rect.inflate(30, 20), border_radius = 8)
@@ -175,7 +175,7 @@ def won_game():
 	constants.screen.blit(menu_text, won_menu_rect)
 	constants.screen.blit(exit_text, won_exit_rect)
 
-	font_and_pic_connection.trophy_rect.center = (constants.width // 2, constants.height // 2)
+	font_and_pic_connection.trophy_rect.center = (constants.width // 2, constants.height // 2 - 150)
 	constants.screen.blit(font_and_pic_connection.trophy, font_and_pic_connection.trophy_rect)
 
 	# Walls
