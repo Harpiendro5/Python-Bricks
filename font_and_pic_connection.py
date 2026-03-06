@@ -17,10 +17,10 @@ except:
 	game_over_font = pygame.font.Font(None, 150)
 
 try:
-	trophy = pygame.image.load("").convert_alpha()
+	trophy_raw = pygame.image.load("").convert_alpha()
+	trophy = pygame.transform.scale(trophy_raw, (400, 400))
 	trophy_rect = trophy.get_rect()
 
 except pygame.error as e:
 	print(f"{constants.TERMINAL_RED}Error loading image: {e}{constants.TERMINAL_RESET}")
-
 	sys.exit()
