@@ -1,5 +1,6 @@
 import pygame
 import sys
+import math
 import constants
 import game_scenes
 
@@ -18,6 +19,8 @@ ball_radius = 10
 
 ball_vx = 5
 ball_vy = -5
+base_speed = 5
+hard_speed = 10
 
 bottom_wall = pygame.Rect(0, constants.height - constants.wall_thickness // 2, constants.width, 10)
 
@@ -73,6 +76,13 @@ while True:
 						bricks = game_scenes.generate_bricks()
 						ball_x = constants.width - constants.width // 2
 						ball_y = constants.height // 2 + 100
+						# If top space is true then easy is selected
+						if top_space:
+							mode = "easy"
+							ball_vx, ball_vy = base_speed, -base_speed
+						else:
+							mode = "hard"
+							ball_vx, ball_vy = hard_speed, -hard_speed
 
 					elif game_state == "game_over":
 						game_state = "game"
@@ -138,6 +148,13 @@ while True:
 						main_rect = pygame.Rect(constants.width//2 - 102, paddle_y, 175, 30)
 						ball_x = constants.width - constants.width // 2
 						ball_y = constants.height // 2 + 100
+						if top_space:
+							mode = "easy"
+							ball_vx, ball_vy = base_speed, -base_speed
+						else:
+							mode = "hard"
+							ball_vx, ball_vy = hard_speed, -hard_speed
+
 					
 					if exit_over_rect.collidepoint(mouse_pos):
 						print(f"{constants.TERMINAL_RED}Exiting...{constants.TERMINAL_RESET}")
@@ -166,7 +183,6 @@ while True:
 					if won_menu_rect.collidepoint(mouse_pos):
 						game_state = "start"
 					
-
 	keys = pygame.key.get_pressed()
 
 	if game_state == "start":
@@ -177,9 +193,15 @@ while True:
 		prev_paddle_x = main_rect.x
 
 		if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-			main_rect.move_ip(-9, 0)
+			if mode == "easy":
+				main_rect.move_ip(-9, 0)
+			else:
+				main_rect.move_ip(-13, 0)
 		if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-			main_rect.move_ip(9, 0)
+			if mode == "easy":
+				main_rect.move_ip(9, 0)
+			else:
+				main_rect.move_ip(13, 0)
 		
 		paddle_vx = main_rect.x - prev_paddle_x
 		
@@ -232,18 +254,34 @@ while True:
 				break
 
 		if ball_rect.colliderect(main_rect):
-			# Push ball above paddle to stop sticking
+			# Ball goes up to prevent sticking
 			ball_rect.bottom = main_rect.top
 			ball_y = ball_rect.centery
 
-			# Always bounce upward
-			ball_vy = -abs(ball_vy)
+			# -1 is far left side and 1 is far right side
+			ball_center = ball_rect.centerx
+			paddle_center = main_rect.centerx
+			paddle_half_width = main_rect.width / 2
 
-			# Influence direction
-			if paddle_vx < 0 and ball_vx > 0:
-				ball_vx *= -1
-			if paddle_vx > 0 and ball_vx < 0:
-				ball_vx *= -1
+			hit_offset = ball_center - paddle_center
+			hit_pos = hit_offset / paddle_half_width
+
+			# Clamp to prevent the ball from going slightly outside the rectangel edge
+			if hit_pos > 1:
+				hit_pos = 1
+			if hit_pos < -1:
+				hit_pos = -1
+			
+			max_bounce_angle = 75
+			bounce_angle_degrees = hit_pos * max_bounce_angle
+			bounce_angle_radians = math.radians(bounce_angle_degrees)
+
+			# Preserve speed
+			current_speed = math.sqrt(ball_vx ** 2 + ball_vy ** 2)
+
+			# Convert angle to correct components, SOH-CAH-TOA
+			ball_vx = current_speed * math.sin(bounce_angle_radians)
+			ball_vy = -current_speed * math.cos(bounce_angle_radians)
 
 		# Left wall
 		if ball_x - ball_radius <= constants.wall_thickness:
@@ -262,6 +300,9 @@ while True:
 		# Collide with the bottom
 		if ball_y + ball_radius >= bottom_wall.top:
 			game_state = "game_over"
+
+		if not bricks:
+			game_state = "won_game"
 
 	if game_state == "pause":
 		paused_rect, cheat_rect, exit_rect = game_scenes.pause_menu()
