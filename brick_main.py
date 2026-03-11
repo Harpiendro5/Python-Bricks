@@ -144,7 +144,7 @@ while True:
 
 					if play_rect.collidepoint(mouse_pos):
 						game_state = "game"
-						game_scenes.generate_bricks()
+						bricks = game_scenes.generate_bricks()
 						main_rect = pygame.Rect(constants.width//2 - 102, paddle_y, 175, 30)
 						ball_x = constants.width - constants.width // 2
 						ball_y = constants.height // 2 + 100
