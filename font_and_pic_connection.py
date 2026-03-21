@@ -6,7 +6,7 @@ import constants
 pygame.font.init()
 
 try:
-	font_path = "" # Must replace with your own path
+	font_path = "" # Must replace with your own path as well as have PressStart2P downloaded
 	mode_select_font = pygame.font.Font(font_path, 30)
 	game_title_font = pygame.font.Font(font_path, 45)
 	game_over_font = pygame.font.Font(font_path, 90)
