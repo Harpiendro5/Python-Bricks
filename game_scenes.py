@@ -3,6 +3,8 @@ import random
 import constants
 import font_and_pic_connection
 
+input_box_width = 350
+
 
 def generate_bricks():
 	bricks = []
@@ -16,6 +18,7 @@ def generate_bricks():
 			bricks.append((rect, color))
 	
 	return bricks
+
 
 def draw_bricks(bricks, alpha = 255):
 	if not bricks:
@@ -32,6 +35,7 @@ def draw_bricks(bricks, alpha = 255):
 	else:
 		for rect, color in bricks:
 			pygame.draw.rect(constants.screen, color, rect)
+
 
 def game_over():
 	constants.screen.fill(constants.BLACK)
@@ -66,6 +70,7 @@ def game_over():
 	pygame.display.flip()
 
 	return play_rect, exit_over_rect, main_menu_rect
+
 
 def start_screen(dummy_rect, top_space, triangle_pos_1, triangle_pos_2, dummy_bricks):
 	constants.screen.fill(constants.BLACK)
@@ -110,6 +115,7 @@ def start_screen(dummy_rect, top_space, triangle_pos_1, triangle_pos_2, dummy_br
 
 	return start_rect
 
+
 def main_game(main_rect, ball_x, ball_y, ball_radius, bottom_wall, bricks):
 	constants.screen.fill(constants.BLACK)
 	if main_rect:
@@ -126,6 +132,7 @@ def main_game(main_rect, ball_x, ball_y, ball_radius, bottom_wall, bricks):
 	pygame.draw.rect(constants.screen, (40, 40, 60), bottom_wall) # Bottom
 
 	pygame.display.flip()
+
 
 def pause_menu():
 	constants.screen.fill((10, 10, 10))
@@ -156,17 +163,18 @@ def pause_menu():
 
 	return paused_rect, cheat_rect, exit_rect
 
+
 def won_game():
 	constants.screen.fill(constants.BLACK)
 
 	won_text = font_and_pic_connection.game_over_font.render("!YOU WIN!", True, constants.BRIGHT_GREEN)
-	won_rect = won_text.get_rect(center = (constants.width // 2, constants.height // 2 - 320))
+	won_rect = won_text.get_rect(center = (constants.width // 2, constants.height // 2 - 300))
 
 	menu_text = font_and_pic_connection.mode_select_font.render("MAIN MENU", True, constants.WHITE)
-	won_menu_rect = menu_text.get_rect(center = (constants.width // 2, constants.height // 2 + 20))
+	won_menu_rect = menu_text.get_rect(center = (constants.width // 2, constants.height // 2 + 40))
 
 	exit_text = font_and_pic_connection.mode_select_font.render("EXIT", True, constants.WHITE)
-	won_exit_rect = exit_text.get_rect(center = (constants.width // 2, constants.height // 2 + 100))
+	won_exit_rect = exit_text.get_rect(center = (constants.width // 2, constants.height // 2 + 120))
 
 	pygame.draw.rect(constants.screen, (40, 40, 60), won_menu_rect.inflate(30, 20), border_radius = 8)
 	pygame.draw.rect(constants.screen, (40, 40, 60), won_exit_rect.inflate(30, 20), border_radius = 8)
@@ -186,3 +194,43 @@ def won_game():
 	pygame.display.flip()
 
 	return won_menu_rect, won_exit_rect
+
+
+def cheat_menu(input_text, show_cursor):
+	constants.screen.fill(constants.BLACK)
+
+	# Title
+	cheats_text = font_and_pic_connection.mode_select_font.render("CHEATS", True, constants.WHITE)
+	cheats_rect = cheats_text.get_rect(center = (constants.width // 4 - 30, constants.height // 4 - 100))
+	constants.screen.blit(cheats_text, cheats_rect)
+
+	# Textbox Border/box
+	input_box = pygame.Rect(constants.width // 2 + 30, constants.height // 4 - 125, input_box_width, 50)
+	pygame.draw.rect(constants.screen, constants.WHITE, input_box, 2) # Textbox Border
+
+	# Render the typed text
+	content_surf = font_and_pic_connection.mode_select_font.render(input_text, True, constants.WHITE)
+	text_x = input_box.x + 10
+	text_y = input_box.y + 10
+	constants.screen.blit(content_surf, (input_box.x + 10, input_box.y + 10))
+
+	# Find the dynamic/moving cursor position
+	text_width, _ = font_and_pic_connection.mode_select_font.size(input_text)
+
+	# Blinking cursor
+	if show_cursor:
+		# Find x at 95% if the box width
+		cursor_x = text_x + text_width + 2
+
+		start_y = input_box.y + 10
+		end_y = input_box.y + input_box.height - 10
+
+		pygame.draw.line(constants.screen, constants.WHITE, (cursor_x, start_y), (cursor_x, end_y))
+	
+	# Walls
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.wall_thickness, constants.height))  # Left
+	pygame.draw.rect(constants.screen, (40, 40, 60), (constants.width - constants.wall_thickness, 0, constants.wall_thickness, constants.height)) # Right
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, 0, constants.width, 10)) # Top
+	pygame.draw.rect(constants.screen, (40, 40, 60), (0, constants.height - constants.wall_thickness // 2, constants.width, 10)) # Bottom
+	pygame.display.flip()
+	
