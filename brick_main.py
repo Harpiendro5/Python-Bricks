@@ -3,13 +3,14 @@ import sys
 import math
 import constants
 import game_scenes
+import font_and_pic_connection
 
 
 pygame.init()
 pygame.font.init()
 clock = pygame.time.Clock()
 
-game_state = "start"  # start | game | pause | game_over | won_game
+game_state = "start"  # start | game | pause | game_over | won_game | cheat_menu
 main_rect = None      # Paddle does not exist yet
 paddle_y = constants.height - 60
 
@@ -25,6 +26,11 @@ hard_speed = 10
 bottom_wall = pygame.Rect(0, constants.height - constants.wall_thickness // 2, constants.width, 10)
 
 top_space = True
+
+cheat_input = ""
+cursor_visible = True
+last_blink_time = pygame.time.get_ticks()
+cursor_timer = 0
 
 # Place Holer Values
 start_rect = pygame.Rect(0, 0, 0, 0)
@@ -45,7 +51,7 @@ bricks = game_scenes.generate_bricks()
 # x1 y1, x2 y2, x3 y3
 triangle_pos_1 = [
 	(constants.width // 2 - 95, constants.height // 2 + 65), # Top Left
-	(constants.width // 2 - 95, constants.height // 2 + 95), # Botton Left
+	(constants.width // 2 - 95, constants.height // 2 + 95), # Bottom Left
 	(constants.width // 2 - 75, constants.height // 2 + 80) # Bottom Right
 ]
 
@@ -68,6 +74,34 @@ while True:
 				if event.key == pygame.K_ESCAPE:
 					pygame.quit()
 					sys.exit()
+				
+				if game_state == "cheat_menu":
+					if event.key == pygame.K_BACKSPACE:
+						cheat_input = cheat_input[:-1]
+					elif event.key == pygame.K_RETURN:
+						print(f"{constants.TERMINAL_YELLOW}Cheat entered: {cheat_input}{constants.TERMINAL_RESET}")
+						
+						if cheat_input == "quit":
+							game_state = "game"
+
+						elif cheat_input == "exit":
+							pygame.quit()
+							sys.exit()
+							break
+						else:
+							game_state = "pause"
+						cheat_input = ""
+					else:
+						# Unicode captures the actual letter input
+						# isprintable stops weird characters
+						if event.unicode.isprintable() and len(cheat_input) < 20:
+							# Find what the new width would be
+							new_text = cheat_input + event.unicode
+							# Use the same font
+							text_width, _ = font_and_pic_connection.mode_select_font.size(new_text)
+
+							if text_width < game_scenes.input_box_width:
+								cheat_input = new_text
 
 				if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
 					if game_state == "start":
@@ -85,11 +119,10 @@ while True:
 							ball_vx, ball_vy = hard_speed, -hard_speed
 
 					elif game_state == "game_over":
-						game_state = "game"
-						main_rect = pygame.Rect(constants.width // 2 - 102, paddle_y, 175, 30)
-						bricks = game_scenes.generate_bricks()
-						ball_x = constants.width - constants.width // 2
-						ball_y = constants.height // 2 + 100
+						game_state = "start"
+					
+					elif game_state == "won_game":
+						game_state = "start"
 					
 				if event.key == pygame.K_DOWN or event.key == pygame.K_s:
 					if game_state == "start":
@@ -137,7 +170,7 @@ while True:
 						sys.exit()
 					
 					if cheat_rect.collidepoint(mouse_pos):
-						game_state = "won_game"
+						game_state = "cheat_menu"
 						"""print("Cheat menu clicked")"""
 
 				if game_state == "game_over":
@@ -266,7 +299,7 @@ while True:
 			hit_offset = ball_center - paddle_center
 			hit_pos = hit_offset / paddle_half_width
 
-			# Clamp to prevent the ball from going slightly outside the rectangel edge
+			# Clamp to prevent the ball from going slightly outside the rectangle edge
 			if hit_pos > 1:
 				hit_pos = 1
 			if hit_pos < -1:
@@ -306,6 +339,12 @@ while True:
 
 	if game_state == "pause":
 		paused_rect, cheat_rect, exit_rect = game_scenes.pause_menu()
+	if game_state == "cheat_menu":
+		current_time = pygame.time.get_ticks()
+		if current_time - cursor_timer > 500: # 1/2 a second
+			cursor_visible = not cursor_visible
+			cursor_timer = current_time
+		game_scenes.cheat_menu(cheat_input, cursor_visible)
 	if game_state == "game_over":
 		play_rect, exit_over_rect, main_menu_rect = game_scenes.game_over()
 	if game_state == "won_game":
@@ -313,4 +352,3 @@ while True:
 
 	pygame.display.flip()
 	clock.tick(60)
-
