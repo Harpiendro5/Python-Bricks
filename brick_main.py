@@ -1,3 +1,5 @@
+# The whole codebase accounted for the project contains ~350 lines of code
+
 import pygame
 import sys
 import math
@@ -11,7 +13,7 @@ pygame.font.init()
 clock = pygame.time.Clock()
 
 game_state = "start"  # start | game | pause | game_over | won_game | cheat_menu
-main_rect = None      # Paddle does not exist yet
+main_rect = None
 paddle_y = constants.height - 60
 
 ball_x = constants.width // 2
